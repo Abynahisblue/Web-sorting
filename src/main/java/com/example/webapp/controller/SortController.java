@@ -1,11 +1,13 @@
 package com.example.webapp.controller;
 
 
-
+import com.example.webapp.exception.InvalidAlgorithmException;
+import com.example.webapp.exception.InvalidArrayFormatException;
 import com.example.webapp.model.SortResponse;
 import com.example.webapp.services.SortService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,43 +31,82 @@ public class SortController {
     public String sortArray(@RequestParam("array") String arrayString,
                             @RequestParam("algorithm") String algorithm,
                             Model model) {
-        System.out.println("ghgfdsjkakjfhhvgrd svjhczhgkdsf");
-        int[] array = Arrays.stream(arrayString.split(","))
-                .mapToInt(Integer::parseInt)
-                .toArray();
-        int[] sortedArray;
+        int[] array;
+        try {
+            array = Arrays.stream(arrayString.split(","))
+                    .mapToInt(Integer::parseInt)
+                    .toArray();
+        } catch (NumberFormatException e) {
+            throw new InvalidArrayFormatException("Invalid array format. Please provide a comma-separated list of integers.");
+        }
 
-        switch (algorithm) {
+        int[] sortedArray;
+        switch (algorithm.toLowerCase()) {
             case "heap":
                 sortedArray = sortService.heapSort(array);
+                break;
+            case "radix":
+                sortedArray = sortService.radixSort(array);
+                break;
+            case "bucket":
+                sortedArray = sortService.bucketSort(array);
+                break;
+            case "merge":
+                sortedArray = sortService.mergeSort(array);
                 break;
             case "quick":
                 sortedArray = sortService.quickSort(array);
                 break;
             default:
-                sortedArray = sortService.quickSort(array);
-                break;
+                throw new InvalidAlgorithmException("Invalid sorting algorithm. Supported algorithms are: heap, radix, bucket, merge, quick.");
         }
 
         SortResponse response = new SortResponse(sortedArray);
-        addHateoasLinks(response, arrayString, algorithm);
-        model.addAttribute("response", response);
+        //addHateoasLinks(response, arrayString, algorithm);
+        model.addAttribute("response", sortedArray);
 
         return "sortedList";
     }
 
     private void addHateoasLinks(SortResponse response, String arrayString, String algorithm) {
         Link selfLink = linkTo(methodOn(SortController.class).sortArray(arrayString, algorithm, null)).withSelfRel();
-        Link heapSortLink = linkTo(methodOn(SortController.class).sortArray(arrayString, "heap", null)).withRel("heap-sort");
-        Link quickSortLink = linkTo(methodOn(SortController.class).sortArray(arrayString, "quick", null)).withRel("quick-sort");
-
         response.add(selfLink);
-        response.add(heapSortLink);
-        response.add(quickSortLink);
     }
 
+    @ExceptionHandler(InvalidAlgorithmException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidAlgorithmException(InvalidAlgorithmException e) {
+        return new ErrorResponse(e.getMessage());
+    }
 
+    @ExceptionHandler(InvalidArrayFormatException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidArrayFormatException(InvalidArrayFormatException e) {
+        return new ErrorResponse(e.getMessage());
+    }
 
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneralException(Exception e) {
+        return new ErrorResponse("An unexpected error occurred: " + e.getMessage());
+    }
+
+    public static class ErrorResponse {
+        private String message;
+
+        public ErrorResponse(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+}
 //    @PostMapping("/quick")
 //    public SortResponse quickSort(@RequestBody int[] array) {
 //        int[] sortedArray = sortService.quickSort(array);
@@ -78,4 +119,4 @@ public class SortController {
 //    }
 
 
-}
+
