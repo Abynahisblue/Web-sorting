@@ -1,6 +1,8 @@
 package com.example.webapp.controller;
 
 
+
+
 import com.example.webapp.exception.InvalidAlgorithmException;
 import com.example.webapp.exception.InvalidArrayFormatException;
 import com.example.webapp.model.SortResponse;
@@ -62,7 +64,7 @@ public class SortController {
         }
 
         SortResponse response = new SortResponse(sortedArray);
-        //addHateoasLinks(response, arrayString, algorithm);
+       // addHateoasLinks(response, arrayString, algorithm);
         model.addAttribute("response", sortedArray);
 
         return "sortedList";

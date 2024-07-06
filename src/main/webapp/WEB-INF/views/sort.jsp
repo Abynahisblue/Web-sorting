@@ -36,7 +36,8 @@
             padding: 8px;
             box-sizing: border-box;
         }
-        .form-group input[type="submit"] {
+        .form-group input[type="submit"],
+        .form-group input[type="button"] {
             background-color: #4CAF50;
             color: #fff;
             border: none;
@@ -44,7 +45,8 @@
             cursor: pointer;
             border-radius: 5px;
         }
-        .form-group input[type="submit"]:hover {
+        .form-group input[type="submit"]:hover,
+        .form-group input[type="button"]:hover {
             background-color: #45a049;
         }
         .sorted-array {
@@ -54,7 +56,40 @@
             border: 1px solid #b3d4fc;
             border-radius: 5px;
         }
+        .json-response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3fe;
+            border: 1px solid #b3d4fc;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#jsonButton").click(function(event) {
+                event.preventDefault();
+                const array = $("#array").val();
+                const algorithm = $("#algorithm").val();
+                $.ajax({
+                    url: "${pageContext.request.contextPath}/api/sort/array",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        array: array,
+                        algorithm: algorithm
+                    }),
+                    success: function(response) {
+                        $(".json-response").html(JSON.stringify(response));
+                    },
+                    error: function(xhr, status, error) {
+                        $(".json-response").html("An error occurred: " + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body>
 <div class="form-container">
@@ -77,12 +112,16 @@
         <div class="form-group">
             <input type="submit" value="Sort" />
         </div>
+        <div class="form-group">
+            <input type="button" id="jsonButton" value="Get JSON Response" />
+        </div>
     </form>
     <c:if test="${not empty sortedArray}">
         <div class="sorted-array">
             <p>Sorted Array: ${sortedArray}</p>
         </div>
     </c:if>
+    <div class="json-response"></div>
 </div>
 </body>
 </html>

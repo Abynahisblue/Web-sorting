@@ -67,10 +67,11 @@
     <h1>Sorted Array</h1>
     <h2>Links</h2>
     <ul>
-        <%-- <c:forEach var="link" items="${response.links}"> --%>
-        <%--     <li><a href="${link.href}">${link.rel}</a></li> --%>
-        <%-- </c:forEach> --%>
+<%--         <c:forEach var="link" items="${response.links}"> --%>
+<%--             <li><a href="${link.href}">${link.rel}</a></li> --%>
+<%--         </c:forEach> --%>
     </ul>
+
     <h3>Sorted Array</h3>
     <div class="sorted-array">
         [
